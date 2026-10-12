@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Planung: Zahl im Array suchen</title>
+<style>
+:root{--bg:#f5f7fa;--panel:#fff;--ink:#1c2430;--mute:#5d6b7c;--line:#c5ced9;--acc:#1f5fbf;--accbg:#e3edfb;--ok:#1d7a46;--okbg:#dff3e7;--bad:#b3261e;--badbg:#fbe4e2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141a22;--panel:#1d2530;--ink:#e8edf3;--mute:#9aa8b8;--line:#3a4757;--acc:#7fb0ff;--accbg:#22344f;--ok:#6fd19b;--okbg:#1b3a2a;--bad:#ff8f87;--badbg:#4a2422}}
+:root[data-theme="dark"]{--bg:#141a22;--panel:#1d2530;--ink:#e8edf3;--mute:#9aa8b8;--line:#3a4757;--acc:#7fb0ff;--accbg:#22344f;--ok:#6fd19b;--okbg:#1b3a2a;--bad:#ff8f87;--badbg:#4a2422}
+*{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.6rem;margin:0 0 6px}
+h2{font-size:1.1rem;margin:22px 0 6px}
+p{margin:6px 0}
+.mute{color:var(--mute)}
+.task{background:var(--panel);border-left:5px solid var(--acc);padding:10px 14px;border-radius:6px;margin:12px 0}
+code{font-family:ui-monospace,Consolas,Menlo,monospace;font-size:.92em}
+#pool{display:flex;flex-direction:column;gap:8px;padding:12px;margin:10px 0;min-height:64px;background:var(--panel);border:2px dashed var(--line);border-radius:10px}
+#pool:empty::before{content:"Alle Bausteine sind verteilt.";color:var(--mute)}
+.chip{padding:8px 12px;background:var(--panel);border:1.5px solid var(--acc);border-radius:6px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.chip.sel{background:var(--accbg);outline:2px solid var(--acc)}
+.chip.ok{border-color:var(--ok);background:var(--okbg)}
+.chip.bad{border-color:var(--bad);background:var(--badbg)}
+.chip.drag{opacity:.35}
+.ghost{position:fixed;z-index:50;pointer-events:none;max-width:320px;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.plan{margin:10px 0;padding:6px 12px 12px;background:var(--panel);border:2px solid var(--ink);border-radius:4px}
+.row{margin-top:10px}
+.i1{margin-left:26px}.i2{margin-left:52px}
+.lbl{font-weight:600;font-size:.95rem}
+.zone{min-height:48px;padding:6px;border:1.5px dashed var(--line);border-radius:6px;margin-top:4px}
+.zone:empty::before{content:attr(data-label);color:var(--mute);font-style:italic;line-height:34px;padding-left:4px}
+.over{background:var(--accbg);border-color:var(--acc)}
+.hint{font-size:.9rem;color:var(--bad);margin-top:3px}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px}
+button{font:inherit;font-weight:600;padding:9px 18px;border-radius:8px;border:1.5px solid var(--acc);cursor:pointer;background:var(--acc);color:#fff}
+button.sec{background:transparent;color:var(--acc)}
+:root[data-theme="dark"] button:not(.sec){color:#10243f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button:not(.sec){color:#10243f}}
+button:focus-visible,.chip:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+#msg{font-weight:600}
+ul{margin:6px 0;padding-left:22px}
+</style>
+</head>
+<body>
+<main>
+<h1>Planung: Zahl im Array suchen</h1>
+<div class="task"><strong>Aufgabe:</strong> In der Klasse gibt es bereits ein Array <code>liste</code> mit ganzen Zahlen (als Attribut, du musst es nicht anlegen). Schreibe eine Methode <code>sucheZahl(int zahl)</code>. Sie soll ausgeben, an welcher Stelle (Index) die Zahl im Array steht, oder dass die Zahl nicht enthalten ist.</div>
+<p class="mute">Bevor du programmierst, plane dein Vorgehen: Ziehe die passenden Schritte in die Felder, und zwar in der richtigen Reihenfolge. Es sind mehr Bausteine da, als du brauchst. Auf Tablets: Baustein antippen, dann das Feld antippen.</p>
+
+<div id="pool" data-zone="pool"></div>
+
+<div class="plan">
+  <div class="row"><div class="lbl">Vor der Schleife</div><div class="zone" data-zone="s1" data-label="Baustein hierher ziehen"></div></div>
+  <div class="row"><div class="lbl">Wiederholung</div><div class="zone" data-zone="s2" data-label="Baustein hierher ziehen"></div></div>
+  <div class="row i1"><div class="lbl">In jedem Durchlauf: Bedingung</div><div class="zone" data-zone="s3" data-label="Baustein hierher ziehen"></div></div>
+  <div class="row i2"><div class="lbl">Wenn die Bedingung stimmt</div><div class="zone" data-zone="s4" data-label="Baustein hierher ziehen"></div></div>
+  <div class="row"><div class="lbl">Nach der Schleife: Bedingung</div><div class="zone" data-zone="s5" data-label="Baustein hierher ziehen"></div></div>
+  <div class="row i1"><div class="lbl">Wenn die Bedingung stimmt</div><div class="zone" data-zone="s6" data-label="Baustein hierher ziehen"></div></div>
+  <div class="row i1"><div class="lbl">Sonst</div><div class="zone" data-zone="s7" data-label="Baustein hierher ziehen"></div></div>
+</div>
+
+<div class="bar">
+  <button id="check">Prüfen</button>
+  <button id="reset" class="sec">Neu starten</button>
+  <span id="msg" role="status"></span>
+</div>
+
+<h2>Danach: programmieren und testen</h2>
+<p>Setze deinen Plan jetzt in Java um. Teste deine Methode mit diesen Fällen:</p>
+<ul>
+<li>Die Zahl kommt genau einmal im Array vor.</li>
+<li>Die Zahl kommt nicht vor.</li>
+<li>Die Zahl steht ganz vorne oder ganz hinten.</li>
+<li>Die Zahl kommt mehrfach vor. Welche Stelle gibt deine Methode aus? Ist das sinnvoll?</li>
+</ul>
+</main>
+
+<script>
+var items=[
+ {t:"Eine Variable für das Ergebnis anlegen und mit einem Wert starten, der kein gültiger Index sein kann",z:"s1",h:"Du brauchst einen Speicherplatz, bevor die Schleife beginnt. Welcher Wert kann nie ein echter Index sein?"},
+ {t:"Alle Positionen des Arrays von vorne bis hinten durchlaufen",z:"s2",h:"Das Array soll vollständig durchsucht werden. Wo beginnt und wo endet die Zählung?"},
+ {t:"Prüfen: Ist der Wert an der aktuellen Position gleich der gesuchten Zahl?",z:"s3",h:"Was muss in jedem einzelnen Durchlauf verglichen werden?"},
+ {t:"Die aktuelle Position im Ergebnis merken",z:"s4",h:"Bei einem Treffer wird zunächst nur etwas gespeichert, noch nichts ausgegeben."},
+ {t:"Prüfen: Hat sich das Ergebnis gegenüber dem Startwert verändert?",z:"s5",h:"Wann weißt du sicher, ob etwas gefunden wurde? Erst, wenn das ganze Array durchlaufen ist."},
+ {t:"Die gemerkte Position ausgeben",z:"s6",h:"Was gibst du aus, wenn etwas gefunden wurde?"},
+ {t:"Ausgeben, dass die Zahl nicht im Array enthalten ist",z:"s7",h:"Was gibst du aus, wenn das Ergebnis noch den Startwert hat?"},
+ {t:"Das Array zuerst der Größe nach sortieren",z:""},
+ {t:"In jedem Durchlauf ausgeben, ob die Zahl hier steht oder nicht",z:""},
+ {t:"Die Schleife erst beim zweiten Element beginnen lassen",z:""},
+ {t:"Den Startwert des Ergebnisses auf 0 setzen",z:""},
+ {t:"Die gesuchte Zahl nach jedem Durchlauf um 1 erhöhen",z:""}
+];
+var pool=document.getElementById("pool"), sel=null, msg=document.getElementById("msg");
+
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function zoneOf(el){return el&&el.closest?el.closest("[data-zone]"):null}
+function clearMarks(){
+  document.querySelectorAll(".chip").forEach(function(c){c.classList.remove("ok","bad")});
+  document.querySelectorAll(".hint").forEach(function(h){h.remove()});
+  msg.textContent="";
+}
+function moveTo(chip,zone){
+  if(zone.dataset.zone!=="pool"){
+    var old=zone.firstElementChild;
+    if(old&&old!==chip)pool.appendChild(old);
+  }
+  zone.appendChild(chip);chip.classList.remove("sel");sel=null;clearMarks();
+}
+function build(){
+  pool.innerHTML="";
+  document.querySelectorAll(".zone").forEach(function(z){z.innerHTML=""});
+  shuffle(items.slice()).forEach(function(it){
+    var c=document.createElement("div");
+    c.className="chip";c.textContent=it.t;c.dataset.z=it.z;c.tabIndex=0;
+    pool.appendChild(c);
+  });
+  clearMarks();sel=null;
+}
+
+var drag=null;
+document.addEventListener("pointerdown",function(e){
+  var c=e.target.closest(".chip");if(!c)return;
+  drag={chip:c,x:e.clientX,y:e.clientY,ghost:null};
+  try{c.setPointerCapture(e.pointerId)}catch(_){}
+});
+document.addEventListener("pointermove",function(e){
+  if(!drag)return;
+  if(!drag.ghost){
+    if(Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)<8)return;
+    var g=drag.chip.cloneNode(true);g.classList.add("ghost");document.body.appendChild(g);
+    drag.ghost=g;drag.chip.classList.add("drag");
+  }
+  drag.ghost.style.left=(e.clientX-20)+"px";drag.ghost.style.top=(e.clientY-18)+"px";
+  document.querySelectorAll(".over").forEach(function(z){z.classList.remove("over")});
+  var z=zoneOf(document.elementFromPoint(e.clientX,e.clientY));if(z)z.classList.add("over");
+});
+document.addEventListener("pointerup",function(e){
+  if(!drag)return;
+  var d=drag;drag=null;
+  document.querySelectorAll(".over").forEach(function(z){z.classList.remove("over")});
+  if(d.ghost){
+    var z=zoneOf(document.elementFromPoint(e.clientX,e.clientY));
+    d.ghost.remove();d.chip.classList.remove("drag");
+    if(z)moveTo(d.chip,z);
+  }else{
+    if(sel===d.chip){d.chip.classList.remove("sel");sel=null}
+    else{if(sel)sel.classList.remove("sel");sel=d.chip;d.chip.classList.add("sel")}
+  }
+});
+document.addEventListener("pointercancel",function(){if(drag){if(drag.ghost)drag.ghost.remove();drag.chip.classList.remove("drag");drag=null}});
+document.addEventListener("click",function(e){
+  if(!sel||e.target.closest(".chip"))return;
+  var z=zoneOf(e.target);if(z)moveTo(sel,z);
+});
+document.addEventListener("keydown",function(e){
+  if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("chip")){
+    e.preventDefault();
+    if(sel&&sel!==e.target)sel.classList.remove("sel");
+    e.target.classList.toggle("sel");
+    sel=e.target.classList.contains("sel")?e.target:null;
+  }
+});
+
+document.getElementById("check").onclick=function(){
+  clearMarks();
+  var right=0,hints=0;
+  items.filter(function(i){return i.z}).forEach(function(it){
+    var zone=document.querySelector('[data-zone="'+it.z+'"]');
+    var c=zone.firstElementChild;
+    if(c&&c.dataset.z===it.z){c.classList.add("ok");right++}
+    else{
+      if(c)c.classList.add("bad");
+      var h=document.createElement("div");h.className="hint";h.textContent="Tipp: "+it.h;
+      zone.parentNode.appendChild(h);hints++;
+    }
+  });
+  if(right===7){msg.style.color="var(--ok)";msg.textContent="Dein Plan stimmt. Jetzt kannst du programmieren!"}
+  else{msg.style.color="var(--bad)";msg.textContent=right+" von 7 Feldern richtig."}
+};
+document.getElementById("reset").onclick=build;
+build();
+</script>
+</body>
+</html>
